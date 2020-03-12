@@ -12,6 +12,7 @@ public class Main {
 
 	public static void main(String[] args) throws IOException {
 
+		// parse arguments and store values in CLIOptions.instance
 		new picocli.CommandLine(CLIOptions.instance).parseArgs(args);
 		
 		// DO NOT CHANGE THE FOLLOWING LINES OF CODE

@@ -4,6 +4,9 @@ import picocli.CommandLine.Option;
 
 /**
  * Holds the initial configuration of the application as supplied via the commandline.
+ * This is a singleton object because it will be read-accessed during execution by
+ * different procedures and threads.
+ *
  * Powered by the PicoCLI library.
  *
  * Making this an enum is a way to express the Singleton pattern. Here,
