@@ -2,6 +2,8 @@ package org.bm.cli;
 
 import picocli.CommandLine.Option;
 
+import java.io.File;
+
 /**
  * Holds the initial configuration of the application as supplied via the commandline.
  * This is a singleton object because it will be read-accessed during execution by
@@ -23,8 +25,29 @@ import picocli.CommandLine.Option;
  */
 public enum CLIOptions {
 
+    // a field referencing an instance of this class (lazily initiated)
     instance;
 
-    @Option(names = "-b", description = "foo")
-    public boolean myBool;
+    @Option(names = "--input",
+            required = true,   // default value is false
+            description = "UTF8-encoded file containing data entries separated by newline.")
+    File inputFile;
+
+    @Option(names = "--inputtype",
+            required = true,
+            description = "Interpretation of supplied data.")
+    InputType inputType;
+
+    // todo: "operations" options
+    // use custom parser here and map directly to transformer instances?
+    // cf https://picocli.info/#_custom_type_converters
+
+    @Option(names = "--threads",
+            required = true,
+            description = "Number of threads used for reading and operating on the input.")
+    int nThreads;
+
+    @Option(names = "--output",
+            description = "Path of output file")
+    File outputFile;
 }
