@@ -1,5 +1,6 @@
 package org.bm;
 
+import org.bm.cli.CLIOptions;
 import java.io.IOException;
 
 /**
@@ -10,10 +11,12 @@ import java.io.IOException;
 public class Main {
 
 	public static void main(String[] args) throws IOException {
-		// add your code here
-		
-		
-		
+
+
+		CLIOptions cliOptions = new CLIOptions();
+		new picocli.CommandLine(cliOptions).parseArgs(args);
+
+		System.out.printf("b is %b%n", cliOptions.myBool);
 		
 		// DO NOT CHANGE THE FOLLOWING LINES OF CODE
 		System.out.println(String.format("Processed %d lines (%d of which were unique)", //
