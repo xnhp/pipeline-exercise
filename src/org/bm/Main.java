@@ -1,6 +1,8 @@
 package org.bm;
 
 import org.bm.cli.CLIOptions;
+import picocli.CommandLine;
+
 import java.io.IOException;
 
 /**
@@ -19,6 +21,16 @@ public class Main {
 		System.out.println(String.format("Processed %d lines (%d of which were unique)", //
 				Statistics.getInstance().getNoOfLinesRead(), //
 				Statistics.getInstance().getNoOfUniqueLines()));
+	}
+
+	/**
+	 * Create and configure a CLI parser.
+	 * @param optsObj the object to hold the information parsed from the input args
+	 * @return the CLI parser object. Supports further method chaining.
+	 */
+	public static CommandLine setupCommandLine(CLIOptions optsObj) {
+		return new picocli.CommandLine(optsObj)
+				.setCaseInsensitiveEnumValuesAllowed(true);
 	}
 
 }
