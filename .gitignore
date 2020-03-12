@@ -4,3 +4,4 @@
 # ignore intellij project files
 /.idea/
 /knime_exercise.iml
+/bin/
