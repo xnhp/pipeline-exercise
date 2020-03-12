@@ -12,11 +12,7 @@ public class Main {
 
 	public static void main(String[] args) throws IOException {
 
-
-		CLIOptions cliOptions = new CLIOptions();
-		new picocli.CommandLine(cliOptions).parseArgs(args);
-
-		System.out.printf("b is %b%n", cliOptions.myBool);
+		new picocli.CommandLine(CLIOptions.instance).parseArgs(args);
 		
 		// DO NOT CHANGE THE FOLLOWING LINES OF CODE
 		System.out.println(String.format("Processed %d lines (%d of which were unique)", //
