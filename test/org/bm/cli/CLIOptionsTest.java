@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
+import java.io.File;
+
 import static org.bm.Main.setupCommandLine;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -53,6 +55,26 @@ class CLIOptionsTest {
             };
             cl.parseArgs(args);
         });
+    }
+
+    /**
+     * We additionally test the conversion from a string input to the `File` type
+     */
+    @Test
+    void testTypeConversion() {
+        String filePath = "foo.txt";
+        CommandLine cl = setupCommandLine(CLIOptions.instance);
+        String[] args = new String[] {
+                "--input", filePath,
+                "--inputtype", "double",
+                "--threads", "1",
+                "--output", "bar.txt"
+        };
+        cl.parseArgs(args);
+        assertEquals(
+                CLIOptions.instance.inputFile.getAbsolutePath(),
+                new File(filePath).getAbsolutePath()
+        );
     }
 
 
