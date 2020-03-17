@@ -16,8 +16,8 @@ public class IOUtils {
 
     public static final int chunkSize = 16;
 
-    public static Stream<List<String>> getChunkedStream(Path p) throws IOException {
-        return chunkStream(Files.lines(p), chunkSize);
+    public static <T> Stream<List<T>> getChunkedStream(Stream<T> stream) {
+        return chunkStream(stream, chunkSize);
     }
 
     public static <T> Stream<List<T>> chunkStream(Stream<T> stream, int chunkSize) {

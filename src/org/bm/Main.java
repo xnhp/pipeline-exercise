@@ -8,11 +8,13 @@ import org.bm.operations.StandardOperations;
 import picocli.CommandLine;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,8 +26,6 @@ import java.util.stream.Stream;
  */
 public class Main {
 
-
-
 	public static void main(String[] args) throws IOException {
 
 		// parse arguments and store values in CLIOptions.instance
@@ -35,7 +35,25 @@ public class Main {
 		OperationsManager.registerOperations(StandardOperations.class);
 		OperationsManager.registerOperations(AdditionalOperations.class);
 
-		Stream<List<String>> chunkedInput = IOUtils.getChunkedStream(CLIOptions.instance.getInputFilePath());
+		// obtain a stream of input lines divided into chunks (lists of equal size)
+		Stream<List<String>> chunkedInput = IOUtils.getChunkedStream(
+				Files.lines(CLIOptions.instance.getInputFilePath())
+		);
+
+		processChunks(chunkedInput, System.out::println);
+
+		// DO NOT CHANGE THE FOLLOWING LINES OF CODE
+		System.out.println(String.format("Processed %d lines (%d of which were unique)", //
+				Statistics.getInstance().getNoOfLinesRead(), //
+				Statistics.getInstance().getNoOfUniqueLines()));
+	}
+
+	/**
+	 * todo
+	 * @param chunkedInput A stream consisting of the input lines, chunked.
+	 * @param batchCallback A <code>Consumer</code> that further processes the resulting data
+	 */
+	public static void processChunks(Stream<List<String>> chunkedInput, Consumer<List<String>> batchCallback) {
 		ExecutorService es = Executors.newFixedThreadPool(CLIOptions.instance.nThreads);
 
 		// procedure to be run on a batch of lines
@@ -49,25 +67,21 @@ public class Main {
 			});
 		};
 
-		// running the procedures on the chunked input
+		// executing the procedures on the chunked input
 		chunkedInput // note that this stream is ordered
 			// process each batch
 			.map(evalBatch)
 			// access results in order of input
-			.forEachOrdered((Future f) -> {
+			.forEachOrdered((Future<List<String>> f) -> {
 				try {
-					// Future.get is blocking
-					System.out.println(f.get());
+					batchCallback.accept(
+						// Future.get is blocking
+						f.get()
+					);
 				} catch (InterruptedException | ExecutionException e) {
 					e.printStackTrace();
 				}
 			});
-
-
-		// DO NOT CHANGE THE FOLLOWING LINES OF CODE
-		System.out.println(String.format("Processed %d lines (%d of which were unique)", //
-				Statistics.getInstance().getNoOfLinesRead(), //
-				Statistics.getInstance().getNoOfUniqueLines()));
 	}
 
 
