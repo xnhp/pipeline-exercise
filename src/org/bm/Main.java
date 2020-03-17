@@ -1,5 +1,6 @@
 package org.bm;
 
+import com.sun.javaws.exceptions.InvalidArgumentException;
 import org.bm.cli.CLIOptions;
 import org.bm.io.IOUtils;
 import org.bm.operations.AdditionalOperations;
@@ -26,22 +27,32 @@ import java.util.stream.Stream;
  */
 public class Main {
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 
 		// parse arguments and store values in CLIOptions.instance
 		setupCommandLine(CLIOptions.instance).parseArgs(args);
-		// todo: need no reference to created commandline object?
 
 		OperationsManager.registerOperations(StandardOperations.class);
 		OperationsManager.registerOperations(AdditionalOperations.class);
 
-		// obtain a stream of input lines divided into chunks (lists of equal size)
-		Stream<List<String>> chunkedInput = IOUtils.getChunkedStream(
-				Files.lines(CLIOptions.instance.getInputFilePath())
-		);
+		try {
 
-		processChunks(chunkedInput, System.out::println);
+			// obtain a stream of input lines, divided into chunks (lists of some max. size)
+			Stream<List<String>> chunkedInput = IOUtils.getChunkedStream(
+					Files.lines(CLIOptions.instance.getInputFilePath())
+			);
+			// process chunks, potentially multithreaded, and call the provided callback on each chunk
+			processChunks(chunkedInput, System.out::println);
 
+		} catch (IOException e) {
+			e.printStackTrace(); // todo
+			return;
+		} catch (InvalidArgumentException e) {
+			e.printStackTrace(); // todo
+			return;
+		}
+
+		// access statistics about read data
 		// DO NOT CHANGE THE FOLLOWING LINES OF CODE
 		System.out.println(String.format("Processed %d lines (%d of which were unique)", //
 				Statistics.getInstance().getNoOfLinesRead(), //
@@ -66,6 +77,10 @@ public class Main {
 						.collect(Collectors.toList());
 			});
 		};
+
+		if (chunkedInput.isParallel()) {
+			throw new InvalidArgumentException(new String[]{"stream must be sequential"});
+		}
 
 		// executing the procedures on the chunked input
 		chunkedInput // note that this stream is ordered

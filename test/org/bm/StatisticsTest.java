@@ -1,5 +1,6 @@
 package org.bm;
 
+import com.sun.javaws.exceptions.InvalidArgumentException;
 import org.bm.cli.CLIOptions;
 import org.bm.io.IOUtils;
 import org.bm.operations.AdditionalOperations;
@@ -37,7 +38,12 @@ class StatisticsTest {
         Statistics s = Statistics.getInstance();
         // we assume File.lines to be correct
         Stream<List<String>> stream = IOUtils.getChunkedStream(Stream.of("foo", "bar", "baz", "foo"));
-        Main.processChunks(stream, (l) -> {}); // do nothing with results
+        try {
+            Main.processChunks(stream, (l) -> {}); // do nothing with results
+        } catch (InvalidArgumentException e) {
+            e.printStackTrace();
+            fail();
+        }
         assertEquals(s.getNoOfLinesRead(), 4);
         assertEquals(s.getNoOfUniqueLines(), 3);
     }
