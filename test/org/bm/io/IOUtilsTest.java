@@ -26,4 +26,12 @@ class IOUtilsTest {
         assertArrayEquals(ll.get(2).toArray(), new Integer[] {6,7,8});
         assertArrayEquals(ll.get(3).toArray(), new Integer[] {9});
     }
+
+    @Test
+    void isOrdered() {
+        Stream<Integer> s = IntStream.range(0, 10).boxed();
+        int chunkSize = 3;
+        Stream<List<Integer>> chunked = chunkStream(s, chunkSize);
+        assert !chunked.isParallel();
+    }
 }
