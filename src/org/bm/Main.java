@@ -1,12 +1,21 @@
 package org.bm;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import org.bm.cli.CLIOptions;
-import org.bm.operations.*;
+import org.bm.io.IOUtils;
+import org.bm.operations.AdditionalOperations;
+import org.bm.operations.OperationsManager;
+import org.bm.operations.StandardOperations;
 import picocli.CommandLine;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Main class.
@@ -14,6 +23,8 @@ import java.util.ArrayList;
  * @author KNIME GmbH
  */
 public class Main {
+
+
 
 	public static void main(String[] args) throws IOException {
 
@@ -24,15 +35,34 @@ public class Main {
 		OperationsManager.registerOperations(StandardOperations.class);
 		OperationsManager.registerOperations(AdditionalOperations.class);
 
-		try {
-			Pipeline pip = OperationsManager.assembleIntermediate(
-					new FnPipeline<>("hello world"),
-					CLIOptions.instance.operations
-					);
-			System.out.println(pip.eval());
-		} catch (InvalidArgumentException e) {
-			e.printStackTrace();
-		}
+		Stream<List<String>> chunkedInput = IOUtils.getChunkedStream(CLIOptions.instance.getInputFilePath());
+		ExecutorService es = Executors.newFixedThreadPool(CLIOptions.instance.nThreads);
+
+		// procedure to be run on a batch of lines
+		Function<List<String>, Future<List<String>>> evalBatch = (List<String> lines) -> {
+			// submits the processing of a batch/chunk to the ExecutorService
+			// which returns a Future object containing eventual results
+			return es.submit(() -> {
+				return lines.stream()
+						.map(OperationsManager.evalLine) // map does not break order within chunk
+						.collect(Collectors.toList());
+			});
+		};
+
+		// running the procedures on the chunked input
+		chunkedInput // note that this stream is ordered
+			// process each batch
+			.map(evalBatch)
+			// access results in order of input
+			.forEachOrdered((Future f) -> {
+				try {
+					// Future.get is blocking
+					System.out.println(f.get());
+				} catch (InterruptedException | ExecutionException e) {
+					e.printStackTrace();
+				}
+			});
+
 
 		// DO NOT CHANGE THE FOLLOWING LINES OF CODE
 		System.out.println(String.format("Processed %d lines (%d of which were unique)", //
