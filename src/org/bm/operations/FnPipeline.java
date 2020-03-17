@@ -3,30 +3,45 @@ package org.bm.operations;
 import java.util.function.Function;
 
 /**
- * As opposed to a Java Stream, this acts on a single value
+ * An implementation of the Pipeline interface that uses java.util.Function`s composition methods.
+ * Note: As opposed to a Java Stream, this acts on a single value
  * @author Benjamin Moser.
  */
 public class FnPipeline<A,O> implements Pipeline<A, O> {
 
+    /** we have to keep the base input value because we are actually using
+     * eval (i.e. apply) to check for consistency
+     */
     A input;
 
-    // in-type does not matter anymore (?)
+    /**
+     * The composed <code>Function</code> representing the pipeline operations
+     */
     private Function<A, O> pl;
 
-    // for composing with new functions
+    /**
+     * Constructor constructing a new pipeline from an initial argument and a first function to be applied to it
+     * @param in initial argument
+     * @param newFn first function in the pipeline
+     */
     private FnPipeline(A in, Function<A, O> newFn) {
         this.input = in;
         this.pl = newFn;
     }
 
     // for initialising with a starting value
+    // TODO: move this to a utility function to avoid having a public Constructor not specified by the Interface
     public FnPipeline(A in) {
         this.input = in;
         this.pl = (Function<A, O>) Function.identity();
     }
 
-    // this is a ""polymorphic"" method parametrised by V
-    // returns a new FnPipeline parametrised by V, i.e. with out-type V
+    /**
+     * Extend the current pipeline by using function compoisition provided by java.util.Function
+     * @param f The function to attach to the end of this pipeline
+     * @param <V> The out-type of the pipeline
+     * @return A new pipeline object representing the extended pipeline
+     */
     @Override
     public <V> FnPipeline<A,V> attach(
             // f needs to be able to process geq than T (out-type of previous pipeline)
@@ -40,19 +55,26 @@ public class FnPipeline<A,O> implements Pipeline<A, O> {
         );
     }
 
+    /**
+     * See interface for documentation
+     */
     @Override
     public O eval() {
         return this.pl.apply(input);
     }
 
-    // for a given unparametrised function value, check whether it can be attached to the pipeline.
-    // note we have to do `eval` here because Function compositions are evaluated lazily at runtime, thus
-    // a potential cast exception occurs only then.
+    /**
+     * See interface for documentation.
+     *
+     * We define a function to be attachable iff its in-type is cast-compatible to the out-type of the pipeline.
+     * This is facilitated by the type variables on <code>attach</code>.
+     */
     @Override
     public boolean checkAttachable(Function f) {
         try {
-            // todo: describe what is happening here and why this gives us type compatibility
             Pipeline<A, Object> res = this.attach(f);
+            // note we have to do `eval` here because Function compositions are evaluated lazily at runtime, thus
+            // a potential cast exception occurs only then.
             // todo: avoid laziness by `apply`ing always after attach?
             res.eval();
         } catch (ClassCastException e) {

@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Annotations to provide metadata about operations ("functions").
  * @author Benjamin Moser.
  */
 // keep annotations to runtime

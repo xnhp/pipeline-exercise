@@ -30,10 +30,8 @@ class FnPipelineTest {
 
     @Test
     void checkAttachable() {
-
         Pipeline<Integer, Integer> pip = new FnPipeline<>(new Integer(3));
         assert (!pip.checkAttachable(StandardOperations.negateDouble));
         assert ( pip.checkAttachable(StandardOperations.negateInt));
-
     }
 }

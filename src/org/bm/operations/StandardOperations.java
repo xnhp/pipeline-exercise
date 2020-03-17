@@ -4,10 +4,6 @@ import java.util.function.Function;
 
 /**
  * Holds the standard operations as per the original requirements.
- * Note that these do not have to be in a specific class, only a reference to
- * the `Function` object is needed.
- *
- * Note that we make the big assumption that all of these transformations are pure.
  *
  * @author Benjamin Moser.
  */

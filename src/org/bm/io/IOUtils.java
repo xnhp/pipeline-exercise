@@ -20,6 +20,7 @@ public class IOUtils {
         return chunkStream(stream, chunkSize);
     }
 
+    // todo: make this private
     public static <T> Stream<List<T>> chunkStream(Stream<T> stream, int chunkSize) {
         // this needs to be atomic since the stream is potentially processed in asynchroneously
         AtomicInteger index = new AtomicInteger(0);

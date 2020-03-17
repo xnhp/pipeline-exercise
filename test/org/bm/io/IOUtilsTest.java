@@ -15,6 +15,9 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class IOUtilsTest {
 
+    /**
+     * Check whether the stream is chunked correctly.
+     */
     @Test
     void chunkStreamTest() {
         Stream<Integer> s = IntStream.range(0, 10).boxed();
@@ -27,6 +30,9 @@ class IOUtilsTest {
         assertArrayEquals(ll.get(3).toArray(), new Integer[] {9});
     }
 
+    /**
+     * Check whether `chunkStream` keeps the <i>ordered</i> property of the stream.
+     */
     @Test
     void isOrdered() {
         Stream<Integer> s = IntStream.range(0, 10).boxed();

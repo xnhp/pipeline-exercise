@@ -60,14 +60,22 @@ public class Main {
 	}
 
 	/**
-	 * todo
+	 * Given a stream of chunked input, this method uses a fixed-size thread pool to run the operations
+	 * as defined via the command-line on each line in each chunk. The result is passed to a callback function.
 	 * @param chunkedInput A stream consisting of the input lines, chunked.
-	 * @param batchCallback A <code>Consumer</code> that further processes the resulting data
+	 * @param chunkCallback A <code>Consumer</code> that further processes the resulting data
 	 */
-	public static void processChunks(Stream<List<String>> chunkedInput, Consumer<List<String>> batchCallback) {
+	public static void processChunks(Stream<List<String>> chunkedInput, Consumer<List<String>> chunkCallback) throws InvalidArgumentException {
+		// java.util.concurrent.Executor is a nice framework to handle the management of a thread pool for us.
+		// the the key ingredient is es.submit(•) which submits a task to the thread pool and returns
+		// a "Future" object f that repreents the eventual outcome of the computation.
+		// This is very useful for collecting the result chunks in order: We immediately receive return objects
+		// from the invocations of tasks which we can then process sequentially.
+		// On f, we can call .get(), which is blocking. Thus, if our `Future` objects are in order, and we
+		// sequentially call .get() on each of them, we will collect results in order.
 		ExecutorService es = Executors.newFixedThreadPool(CLIOptions.instance.nThreads);
 
-		// procedure to be run on a batch of lines
+		// declaring the procedure to be run on a batch of lines
 		Function<List<String>, Future<List<String>>> evalBatch = (List<String> lines) -> {
 			// submits the processing of a batch/chunk to the ExecutorService
 			// which returns a Future object containing eventual results
@@ -89,12 +97,12 @@ public class Main {
 			// access results in order of input
 			.forEachOrdered((Future<List<String>> f) -> {
 				try {
-					batchCallback.accept(
+					chunkCallback.accept(
 						// Future.get is blocking
 						f.get()
 					);
 				} catch (InterruptedException | ExecutionException e) {
-					e.printStackTrace();
+					e.printStackTrace(); // todo
 				}
 			});
 	}

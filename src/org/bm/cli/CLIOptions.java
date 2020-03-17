@@ -32,7 +32,8 @@ public enum CLIOptions {
 
     @Option(names = "--input",
             required = true,   // default value is false
-            description = "UTF8-encoded file containing data entries separated by newline.")
+            description = "UTF8-encoded file containing data entries separated by newline. Location relative to the Java" +
+                    "working directory")
     public File inputFile;
 
     @Option(names = "--inputtype",
@@ -40,16 +41,11 @@ public enum CLIOptions {
             description = "Interpretation of supplied data.")
     public InputType inputType;
 
-
-    // use custom parser here and map directly to transformer instances?
-    // cf https://picocli.info/#_custom_type_converters
     @Option(names = "--operations",
             required = true,
             split = ",",
             description = "Sequence of operations to apply to each line")
     public List<String> operations;
-    // todo: using an enum here is not very extensible? would have to modify enum itself
-    // to add new operation
 
     @Option(names = "--threads",
             required = true,
@@ -60,6 +56,14 @@ public enum CLIOptions {
             description = "Path of output file")
     public File outputFile;
 
+    @Option(names = "--chunksize",
+            description = "Number of lines to be processed by a single thread",
+            defaultValue = "16")
+    public int chunkSize;
+
+    /**
+     * @return The full path to the input file as specified by the commandline
+     */
     public Path getInputFilePath() {
         return new File(System.getProperty("user.dir")).toPath().resolve(inputFile.toPath());
     }
