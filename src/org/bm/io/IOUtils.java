@@ -1,8 +1,7 @@
 package org.bm.io;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import org.bm.cli.CLIOptions;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -14,10 +13,15 @@ import java.util.stream.Stream;
  */
 public class IOUtils {
 
-    public static final int chunkSize = 16;
-
+    /**
+     * Divide the stream into chunks of size as defined via CLI options.
+     * @param stream A stream to be chunked.
+     * @param <T> The type of the elements in the stream
+     * @return A new stream with elements of type List<T> where each lists represents a chunk of the elements of the
+     * input stream.
+     */
     public static <T> Stream<List<T>> getChunkedStream(Stream<T> stream) {
-        return chunkStream(stream, chunkSize);
+        return chunkStream(stream, CLIOptions.instance.chunkSize);
     }
 
     // todo: make this private
