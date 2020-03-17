@@ -24,7 +24,8 @@ class CLIOptionsTest {
                 "--input", "foo.txt",
                 "--inputtype", "string",
                 "--threads", "1",
-                "--output", "bar.txt"
+                "--output", "bar.txt",
+                "--operations", "neg"
         };
         cl.parseArgs(args);
         assert CLIOptions.instance.inputType == InputType.STRING;
@@ -37,7 +38,8 @@ class CLIOptionsTest {
                 "--input", "foo.txt",
                 "--inputtype", "double",
                 "--threads", "1",
-                "--output", "bar.txt"
+                "--output", "bar.txt",
+                "--operations", "neg"
         };
         cl.parseArgs(args);
         assert CLIOptions.instance.inputType != InputType.STRING;
@@ -51,7 +53,8 @@ class CLIOptionsTest {
                     "--input", "foo.txt",
                     "--inputtype", "baz",
                     "--threads", "1",
-                    "--output", "bar.txt"
+                    "--output", "bar.txt",
+                    "--operations", "neg"
             };
             cl.parseArgs(args);
         });
@@ -68,7 +71,8 @@ class CLIOptionsTest {
                 "--input", filePath,
                 "--inputtype", "double",
                 "--threads", "1",
-                "--output", "bar.txt"
+                "--output", "bar.txt",
+                "--operations", "neg"
         };
         cl.parseArgs(args);
         assertEquals(
@@ -76,6 +80,5 @@ class CLIOptionsTest {
                 new File(filePath).getAbsolutePath()
         );
     }
-
 
 }

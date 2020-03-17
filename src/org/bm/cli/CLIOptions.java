@@ -3,6 +3,7 @@ package org.bm.cli;
 import picocli.CommandLine.Option;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Holds the initial configuration of the application as supplied via the commandline.
@@ -31,23 +32,30 @@ public enum CLIOptions {
     @Option(names = "--input",
             required = true,   // default value is false
             description = "UTF8-encoded file containing data entries separated by newline.")
-    File inputFile;
+    public File inputFile;
 
     @Option(names = "--inputtype",
             required = true,
             description = "Interpretation of supplied data.")
-    InputType inputType;
+    public InputType inputType;
 
-    // todo: "operations" options
+
     // use custom parser here and map directly to transformer instances?
     // cf https://picocli.info/#_custom_type_converters
+    @Option(names = "--operations",
+            required = true,
+            split = ",",
+            description = "Sequence of operations to apply to each line")
+    public List<String> operations;
+    // todo: using an enum here is not very extensible? would have to modify enum itself
+    // to add new operation
 
     @Option(names = "--threads",
             required = true,
             description = "Number of threads used for reading and operating on the input.")
-    int nThreads;
+    public int nThreads;
 
     @Option(names = "--output",
             description = "Path of output file")
-    File outputFile;
+    public File outputFile;
 }
