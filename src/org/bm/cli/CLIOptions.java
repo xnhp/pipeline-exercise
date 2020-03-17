@@ -3,6 +3,7 @@ package org.bm.cli;
 import picocli.CommandLine.Option;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -58,4 +59,8 @@ public enum CLIOptions {
     @Option(names = "--output",
             description = "Path of output file")
     public File outputFile;
+
+    public Path getInputFilePath() {
+        return new File(System.getProperty("user.dir")).toPath().resolve(inputFile.toPath());
+    }
 }
