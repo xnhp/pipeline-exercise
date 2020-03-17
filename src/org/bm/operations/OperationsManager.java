@@ -1,6 +1,7 @@
 package org.bm.operations;
 
 import com.sun.javaws.exceptions.InvalidArgumentException;
+import org.bm.Statistics;
 import org.bm.cli.CLIOptions;
 
 import java.lang.reflect.Field;
@@ -50,6 +51,7 @@ public class OperationsManager {
 
 
     public static Function<String,String> evalLine = (String line) -> {
+        Statistics.getInstance().updateStatisticsWithLine(line);
         try {
             return OperationsManager
                     .assemblePipeline(line, CLIOptions.instance.operations)
