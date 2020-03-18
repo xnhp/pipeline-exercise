@@ -2,8 +2,9 @@ package org.bm;
 
 import org.bm.cli.CLIOptions;
 import org.bm.io.IOUtils;
-import org.bm.operations.*;
-import org.somecontributor.AdditionalOperations;
+import org.bm.operations.OperationsManager;
+import org.bm.operations.Pipeline;
+import org.bm.operations.StandardOperations;
 import picocli.CommandLine;
 
 import java.io.IOException;

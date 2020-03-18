@@ -18,10 +18,9 @@ public interface Pipeline<A, O> {
 
     /**
      * Creates a new Pipeline object based on this one with <code>f</code> attached.
-     * @param f The function to attach to the end of this pipeline
+     * @param f The field representing the operation to attach
      * @param <V> The output type of <code>f</code> and the output type of the new pipeline.
      * @return a new pipeline parameterised by V, i.e. with out-type V
-     * todo update this
      */
     <V> Pipeline<A,V> attach(
             // todo: comment on Function<? super O, V> f,
@@ -29,10 +28,9 @@ public interface Pipeline<A, O> {
     );
 
     /**
-     * todo update doc
      * Actually compute and return the result value of this pipeline.
-     * This is particularly needed in case of lazy implementations.
-     * @return The result value of this pipeline based on ints initial argument.
+     * @param in The value to apply the pipeline to
+     * @return The result value of this pipeline based on the given argument
      */
     O eval(A in);
 

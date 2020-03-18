@@ -43,8 +43,8 @@ public class FnPipeline<A,O> implements Pipeline<A, O> {
         this.plOutT = initialType;
     }
 
-    /** todo: update doc
-     * Extend the current pipeline by using function compoisition provided by java.util.Function
+    /**
+     * Extend the current pipeline by using function composition provided by java.util.Function
      * @param f The function to attach to the end of this pipeline
      * @param <V> The out-type of the pipeline
      * @return A new pipeline object representing the extended pipeline
@@ -54,7 +54,6 @@ public class FnPipeline<A,O> implements Pipeline<A, O> {
             Field f
     ) {
 
-        Type fOutT = ((ParameterizedType) f.getGenericType()).getActualTypeArguments()[1]; // todo
         try {
             // f.get gets the value of the field in the specified object
             // since we assume f to be a static field, we can "omit" this argument
@@ -63,7 +62,7 @@ public class FnPipeline<A,O> implements Pipeline<A, O> {
             return new FnPipeline<A,V>(
                     // input value remains unchanged
                     this.pl.andThen(fn), // returns a composed function
-                    fOutT
+                    getFnOutT(f)
             );
         } catch (IllegalAccessException e) {
             e.printStackTrace(); // todo
@@ -88,7 +87,7 @@ public class FnPipeline<A,O> implements Pipeline<A, O> {
     @Override
     // note: when calling this with e.g. a Function<String,String> we are actually performing an up-cast
     public boolean checkAttachable(Field f) {
-        Type fInT = ((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0]; // todo
+        Type fInT = getFnInT(f);
 
         // if both are parameterised types, additionally check for equality of their parameters
         if (fInT instanceof ParameterizedType && plOutT instanceof ParameterizedType) {
@@ -110,5 +109,13 @@ public class FnPipeline<A,O> implements Pipeline<A, O> {
         return fInT == plOutT;
         // todo: we only check for exact matches, not subtyping relationships
         //  this is probably possible by obtaining the Class<?> object from the Type and using isInstance
+    }
+
+    private Type getFnInT(Field f) {
+        return ((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0];
+    }
+
+    private Type getFnOutT(Field f) {
+        return ((ParameterizedType) f.getGenericType()).getActualTypeArguments()[1];
     }
 }
