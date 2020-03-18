@@ -36,8 +36,8 @@ public class Main {
             OperationsManager.registerOperations(StandardOperations.class);
             OperationsManager.registerOperations(AdditionalOperations.class);
         } catch (IllegalAccessException e) {
-            System.out.println("Invalid operations");
             e.printStackTrace();
+            return;
         }
 
 
@@ -50,15 +50,13 @@ public class Main {
 			// process chunks, potentially multithreaded, and call the provided callback on each chunk
 			processChunks(chunkedInput, System.out::println);
 
-		} catch (IOException e) {
-			e.printStackTrace(); // todo
-			return;
-		} catch (InvalidArgumentException e) {
-			e.printStackTrace(); // todo
+		} catch (IOException | InvalidArgumentException e) {
+		    e.printStackTrace();
 			return;
 		}
 
-		// access statistics about read data
+
+        // access statistics about read data
 		// DO NOT CHANGE THE FOLLOWING LINES OF CODE
 		System.out.println(String.format("Processed %d lines (%d of which were unique)", //
 				Statistics.getInstance().getNoOfLinesRead(), //
@@ -109,7 +107,7 @@ public class Main {
 						f.get()
 					);
 				} catch (InterruptedException | ExecutionException e) {
-					e.printStackTrace(); // todo
+					e.printStackTrace();
 				}
 			});
 	}
