@@ -56,7 +56,6 @@ public class OperationsManager {
      * @param cmds Commands that define the function composition
      * @return A <code>Pipeline</code> object representing the function composition on the initial argument. Note that
      * at this point, the actual computations are not necessarily carried out yet.
-     * @throws InvalidArgumentException
      */
     public static Pipeline assemblePipeline(String init, List<String> cmds) throws InvalidArgumentException {
         // todo: can express this with stream reduce instead of loop?
@@ -93,8 +92,10 @@ public class OperationsManager {
 
     /**
      * The procedure to be applied to each line.
+     * @throws InvalidArgumentException In case no operations can be found for a given command
+     * @return
      */
-    public final static Function<String,String> evalLine = (String line) -> {
+    public static String evalLine (String line) {
         Statistics.getInstance().updateStatisticsWithLine(line);
         try {
             return OperationsManager
@@ -102,8 +103,9 @@ public class OperationsManager {
                     .eval()
                     .toString(); // todo
         } catch (InvalidArgumentException e) {
-            e.printStackTrace(); // todo
+            System.out.println("No operation found for given command");
+            e.printStackTrace();
+            return null;
         }
-        return null;
     };
 }

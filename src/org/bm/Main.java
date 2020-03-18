@@ -65,6 +65,7 @@ public class Main {
 				Statistics.getInstance().getNoOfUniqueLines()));
 	}
 
+
 	/**
 	 * Given a stream of chunked input, this method uses a fixed-size thread pool to run the operations
 	 * as defined via the command-line on each line in each chunk. The result is passed to a callback function.
@@ -87,7 +88,7 @@ public class Main {
 			// which returns a Future object containing eventual results
 			return es.submit(() -> {
 				return lines.stream()
-						.map(OperationsManager.evalLine) // map does not break order within chunk
+						.map(OperationsManager::evalLine) // map does not break order within chunk
 						.collect(Collectors.toList());
 			});
 		};
