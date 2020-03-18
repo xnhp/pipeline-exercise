@@ -2,6 +2,9 @@ package org.bm.io;
 
 import org.bm.cli.CLIOptions;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -45,4 +48,31 @@ public class IOUtils {
                 .map(Map.Entry::getValue);
     }
 
+    /**
+     * Write a processed chunk to the output file
+     * @param resultChunk
+     */
+    public static void writeToOutFile(List<Object> resultChunk) {
+
+        // convert results to strings
+        List<String> strings = resultChunk.stream()
+                .map(Object::toString)
+                .collect(Collectors.toList());
+
+        try {
+            // use NIO Files over FileWriter because it handles writing seperate lines with
+            // platform-specific newlines
+            // todo: this opens/closes the file on every call of this method
+            //  rather use some static file writer instance
+            // todo: appends to file if already exists
+            Files.write(
+                    CLIOptions.instance.getOutputFilePath(),
+                    strings,
+                    StandardOpenOption.APPEND,
+                    StandardOpenOption.CREATE
+            );
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
 }

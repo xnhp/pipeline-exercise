@@ -67,4 +67,11 @@ public enum CLIOptions {
     public Path getInputFilePath() {
         return new File(System.getProperty("user.dir")).toPath().resolve(inputFile.toPath());
     }
+
+    /**
+     * See CLIOptions.getInputFilePath
+     */
+    public Path getOutputFilePath() {
+        return new File(System.getProperty("user.dir")).toPath().resolve(outputFile.toPath());
+    }
 }

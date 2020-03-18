@@ -30,20 +30,27 @@ public class Main {
 		// parse arguments and store values in CLIOptions.instance
 		setupCommandLine(CLIOptions.instance).parseArgs(args);
 
+		// register available operations. ops that are registered later will overwrite earlier ones with the same
+		// keyword and input type (as defined by checkAttachable)
 		OperationsManager.registerOperations(StandardOperations.class);
 		OperationsManager.registerOperations(AdditionalOperations.class);
+
+		// determine how to handle output
+		Consumer<List<Object>> outputConsumer = (CLIOptions.instance.outputFile == null) ?
+				System.out::println //note that this will carry out an implicit .toString conversion
+				: IOUtils::writeToOutFile;
 
 		try {
 
 			// obtain a stream of input lines, divided into chunks (lists of some max. size)
 			Stream<List<String>> chunkedInput = IOUtils.getChunkedStream(
+					// actually read file
 					Files.lines(CLIOptions.instance.getInputFilePath())
 			);
 			// process chunks, potentially multithreaded, and call the provided callback on each chunk
 			processChunks(
 					chunkedInput,
-					// this will carry out an implicit .toString conversion
-					System.out::println
+					outputConsumer
 			);
 
 		} catch (IOException | InvalidArgumentException e) {
