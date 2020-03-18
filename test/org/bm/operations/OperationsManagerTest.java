@@ -53,7 +53,7 @@ class OperationsManagerTest {
 
         Stream<List<String>> stream = IOUtils.getChunkedStream(Stream.of("a", "b", "c", "d"));
         try {
-            Main.processChunks(stream, (List<String> chunkResult) -> {
+            Main.processChunks(stream, (List<Object> chunkResult) -> {
                 assertEquals(chunkResult.get(0), "baz");
             });
         } catch (InvalidArgumentException e) {
