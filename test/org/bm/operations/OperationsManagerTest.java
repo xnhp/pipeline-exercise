@@ -20,6 +20,17 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class OperationsManagerTest {
 
+    @BeforeAll
+    static void setUp() {
+        try {
+            OperationsManager.registerOperations(OriginalOperations.class);
+            OperationsManager.registerOperations(AdditionalOperations.class);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
     static class OriginalOperations {
         @Operation(keyword = "foo")
         public final static Function<String,String> foo = (String s) -> "bar";
@@ -32,13 +43,6 @@ class OperationsManagerTest {
 
     @Test
     void operationOverwrite() {
-        try {
-            OperationsManager.registerOperations(OriginalOperations.class);
-            OperationsManager.registerOperations(AdditionalOperations.class);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            fail();
-        }
 
         CommandLine cl = setupCommandLine(CLIOptions.instance);
         String[] args = new String[] {
@@ -60,6 +64,58 @@ class OperationsManagerTest {
             e.printStackTrace();
             fail();
         }
+    }
+
+    @Test
+    void inputTypeString() {
+
+        try {
+            OperationsManager.registerOperations(StandardOperations.class);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        CommandLine cl = setupCommandLine(CLIOptions.instance);
+        String[] args = new String[] {
+                "--input", "foo.txt",
+                "--inputtype", "string",
+                "--threads", "1",
+                "--chunksize", "1",
+                "--output", "bar.txt",
+                "--operations", "capitalize"
+        };
+        cl.parseArgs(args);
+
+        OperationsManager.evalLine("42");
+
+
+    }
+
+    @Test
+    void inputTypeFail() {
+        try {
+            OperationsManager.registerOperations(StandardOperations.class);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        CommandLine cl = setupCommandLine(CLIOptions.instance);
+        String[] args = new String[] {
+                "--input", "foo.txt",
+                "--inputtype", "int",
+                "--threads", "1",
+                "--chunksize", "1",
+                "--output", "bar.txt",
+                "--operations", "capitalize"
+        };
+        cl.parseArgs(args);
+
+        assertThrows(InvalidArgumentException.class, () -> {
+            OperationsManager
+                    .assemblePipeline("notanumber", CLIOptions.instance.operations)
+                    .eval();
+        });
+
     }
 
 }

@@ -58,7 +58,23 @@ public class OperationsManager {
     public static Pipeline assemblePipeline(String init, List<String> cmds) throws InvalidArgumentException {
         // todo: can express this with stream reduce instead of loop?
         // todo: make use of CLIOptions.instance.inputType to cast input values
-        Pipeline pip = new FnPipeline<>(init); // pipeline with init value and identity operation
+
+        Pipeline pip;
+        try {
+            switch (CLIOptions.instance.inputType) {
+                case STRING: pip = new FnPipeline<String,String>(init); break;
+                case INT:    pip = new FnPipeline<Integer,Integer>(new Integer(init)); break;
+                case DOUBLE: pip = new FnPipeline<Double,Double>(new Double(init)); break;
+                default:     pip = new FnPipeline(init); break;
+            }
+        } catch (NumberFormatException e) {
+            // NumberFormatException is a subclass of InvalidArgumentException
+            // thus a catch in a parent method would have to make an explicit instanceof check
+            // to avoid this, we construct and throw a new exception here that holds information about the error cause
+            throw new InvalidArgumentException(new String[]{"Could not parse number from input"});
+        }
+
+
         for (String cmd : cmds) {
             List<Function> candidates = opsMap.get(cmd);
             if (candidates == null) {
@@ -98,7 +114,6 @@ public class OperationsManager {
                     .assemblePipeline(line, CLIOptions.instance.operations)
                     .eval();
         } catch (InvalidArgumentException e) {
-            System.out.println("No operation found for given command");
             e.printStackTrace();
             return null;
         }
