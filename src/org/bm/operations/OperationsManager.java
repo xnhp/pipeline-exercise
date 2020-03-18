@@ -24,8 +24,6 @@ public class OperationsManager {
      * of the provided class, all fields of type java.util.Function with an
      * @Operation annotation will be handled.
      * Note that we assume these fields to be properly expressed: static, Function type, and with annotation
-     * TODO: modify attachByCandidates so that operations registered later will be used preferredly
-     *  to allow "overwriting"
      * @param clazz A class containg fields of the type <code>Function</code> annotated by <code>@Operation</code>
      */
     public static void registerOperations(Class clazz) throws IllegalAccessException {
@@ -73,8 +71,6 @@ public class OperationsManager {
 
     /**
      * From a list of candidate functions, determine a "best suited" one to be attached to the pipeline.
-     *
-     * TODO: currently, this is the first one that is "attachable" in the sense of Pipeline.checkAttachable
      *
      * @param initPip Pipeline to be extended
      * @param candidates Candidate functions from which to pick one to be attached
