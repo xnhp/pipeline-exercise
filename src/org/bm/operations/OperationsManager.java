@@ -7,6 +7,7 @@ import org.bm.cli.CLIOptions;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author Benjamin Moser.
@@ -82,10 +83,11 @@ public class OperationsManager {
      * @throws InvalidArgumentException If no candidates or no "attachable" candidates are present.
      */
     private static Pipeline attachByCandidates(Pipeline initPip, List<Function> candidates) throws InvalidArgumentException {
-        Function f =  candidates.stream()
+        List<Function> matches = candidates.stream()
                 .filter(initPip::checkAttachable)
-                .findFirst()
-                .orElseThrow(() -> new InvalidArgumentException(new String[]{"no operation with this keyword fits into specified pipeline"}));
+                .collect(Collectors.toList());
+        Function f = matches.get(matches.size()-1);
+
         // we leave this call unchecked w.r.t type parameters because `checkAttachable` ensures this for us.
         return initPip.attach(f);
     }
