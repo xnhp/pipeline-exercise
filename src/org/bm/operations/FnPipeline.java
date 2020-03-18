@@ -1,9 +1,14 @@
 package org.bm.operations;
 
+import javafx.util.Pair;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 /**
  * An implementation of the Pipeline interface that uses java.util.Function`s composition methods.
@@ -84,6 +89,24 @@ public class FnPipeline<A,O> implements Pipeline<A, O> {
     // note: when calling this with e.g. a Function<String,String> we are actually performing an up-cast
     public boolean checkAttachable(Field f) {
         Type fInT = ((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0]; // todo
+
+        // if both are parameterised types, additionally check for equality of their parameters
+        if (fInT instanceof ParameterizedType && plOutT instanceof ParameterizedType) {
+            ArrayList<Type> inTypeArgs = new ArrayList<>(Arrays.asList(
+                    ((ParameterizedType) fInT).getActualTypeArguments()
+            ));
+            ArrayList<Type> plTypeArgs = new ArrayList<>(Arrays.asList(
+                    ((ParameterizedType) plOutT).getActualTypeArguments()
+            ));
+            return IntStream
+                    // obtain stream over ints ranging to smaller size
+                    .range(0, Math.min(inTypeArgs.size(), plTypeArgs.size()))
+                    // "zip" both lists, i.e. create pairs
+                    .mapToObj(i -> new Pair<>(inTypeArgs.get(i), plTypeArgs.get(i)))
+                    // check if the type parameters match
+                    .allMatch((Pair<Type,Type> p) -> p.getKey() == p.getValue());
+        }
+
         return fInT == plOutT;
         // todo: we only check for exact matches, not subtyping relationships
         //  this is probably possible by obtaining the Class<?> object from the Type and using isInstance
