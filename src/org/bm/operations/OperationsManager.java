@@ -93,10 +93,8 @@ public class OperationsManager {
 
     /**
      * The procedure to be applied to each line.
-     *
-     * TODO: make this field final
      */
-    public static Function<String,String> evalLine = (String line) -> {
+    public final static Function<String,String> evalLine = (String line) -> {
         Statistics.getInstance().updateStatisticsWithLine(line);
         try {
             return OperationsManager
