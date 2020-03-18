@@ -1,4 +1,6 @@
-package org.bm.operations;
+package org.somecontributor;
+
+import org.bm.operations.Operation;
 
 import java.util.function.Function;
 

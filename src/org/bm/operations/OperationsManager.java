@@ -22,6 +22,7 @@ public class OperationsManager {
      * Make operations accessible for being selected by command-line arguments
      * of the provided class, all fields of type java.util.Function with an
      * @Operation annotation will be handled.
+     * Operations that were registered earlier will have precedence (see `attachByCandidate`)
      * Note that we assume these fields to be properly expressed: static, Function type, and with annotation
      * @param clazz A class containg fields of the type <code>Function</code> annotated by <code>@Operation</code>
      */
@@ -90,16 +91,10 @@ public class OperationsManager {
      * @throws InvalidArgumentException If no candidates or no "attachable" candidates are present.
      */
     private static Pipeline attachByCandidates(Pipeline initPip, List<Field> candidates) throws InvalidArgumentException {
-        List<Field> matches = candidates.stream()
+        Field f =  candidates.stream()
                 .filter(initPip::checkAttachable)
-                .collect(Collectors.toList());
-
-        if (matches.size() == 0) {
-            throw new InvalidArgumentException(new String[]{"No matching operation"});
-        }
-
-        Field f = matches.get(matches.size()-1);
-
+                .findFirst()
+                .orElseThrow(() -> new InvalidArgumentException(new String[]{"no operation with this keyword fits into specified pipeline"}));
         // we leave this call unchecked w.r.t type parameters because `checkAttachable` ensures this for us.
         return initPip.attach(f);
     }

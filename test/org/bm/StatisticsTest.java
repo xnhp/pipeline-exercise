@@ -2,7 +2,7 @@ package org.bm;
 
 import org.bm.cli.CLIOptions;
 import org.bm.io.IOUtils;
-import org.bm.operations.AdditionalOperations;
+import org.somecontributor.AdditionalOperations;
 import org.bm.operations.OperationsManager;
 import org.bm.operations.StandardOperations;
 import org.junit.jupiter.api.Test;

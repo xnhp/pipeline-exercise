@@ -22,8 +22,8 @@ class OperationsManagerTest {
 
     @BeforeAll
     static void setUp() {
-        OperationsManager.registerOperations(OriginalOperations.class);
         OperationsManager.registerOperations(AdditionalOperations.class);
+        OperationsManager.registerOperations(OriginalOperations.class);
     }
 
     static class OriginalOperations {

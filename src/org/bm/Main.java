@@ -3,6 +3,7 @@ package org.bm;
 import org.bm.cli.CLIOptions;
 import org.bm.io.IOUtils;
 import org.bm.operations.*;
+import org.somecontributor.AdditionalOperations;
 import picocli.CommandLine;
 
 import java.io.IOException;
@@ -25,14 +26,16 @@ import java.util.stream.Stream;
 public class Main {
 
 	public static void main(String[] args) {
+		start(args);
+	}
 
+	public static void start(String[] args) {
 		// parse arguments and store values in CLIOptions.instance
 		setupCommandLine(CLIOptions.instance).parseArgs(args);
 
-		// register available operations. ops that are registered later will overwrite earlier ones with the same
-		// keyword and input type (as defined by checkAttachable)
+		// register available operations
+		// operations that were registered earlier will have precedence
 		OperationsManager.registerOperations(StandardOperations.class);
-		OperationsManager.registerOperations(AdditionalOperations.class);
 
 		// determine how to handle output
 		Consumer<List<Object>> outputConsumer = (CLIOptions.instance.outputFile == null) ?
@@ -53,12 +56,12 @@ public class Main {
 			);
 
 		} catch (IOException | InvalidArgumentException e) {
-		    e.printStackTrace();
+			e.printStackTrace();
 			return;
 		}
 
 
-        // access statistics about read data
+		// access statistics about read data
 		// DO NOT CHANGE THE FOLLOWING LINES OF CODE
 		System.out.println(String.format("Processed %d lines (%d of which were unique)", //
 				Statistics.getInstance().getNoOfLinesRead(), //
