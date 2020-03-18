@@ -1,6 +1,6 @@
 package org.bm.operations;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
+import org.bm.InvalidArgumentException;
 import org.bm.cli.CLIOptions;
 
 import java.lang.reflect.Field;

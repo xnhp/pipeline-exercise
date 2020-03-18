@@ -1,6 +1,5 @@
 package org.bm;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import org.bm.cli.CLIOptions;
 import org.bm.io.IOUtils;
 import org.bm.operations.*;
