@@ -13,4 +13,7 @@ public class AdditionalOperations {
     @Operation(keyword = "length")
     public final static Function<String,Integer> length = (String s) -> (Integer) s.length();
 
+    @Operation(keyword = "reverse")
+    public final static Function<String, String> reverse = (String s) -> new StringBuilder(s).reverse().toString();
+
 }
