@@ -1,5 +1,8 @@
 package org.bm.operations;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.function.Function;
 
 /**
@@ -9,10 +12,10 @@ import java.util.function.Function;
  */
 public class FnPipeline<A,O> implements Pipeline<A, O> {
 
-    /** we have to keep the base input value because we are actually using
-     * eval (i.e. apply) to check for consistency
+    /**
+     * The output type of the function. Have to keep this updated when attaching
      */
-    A input;
+    private Type plOutT;
 
     /**
      * The composed <code>Function</code> representing the pipeline operations
@@ -21,22 +24,21 @@ public class FnPipeline<A,O> implements Pipeline<A, O> {
 
     /**
      * Constructor constructing a new pipeline from an initial argument and a first function to be applied to it
-     * @param in initial argument
      * @param newFn first function in the pipeline
      */
-    private FnPipeline(A in, Function<A, O> newFn) {
-        this.input = in;
+    private FnPipeline(Function<A, O> newFn, Type newFnOutT) {
         this.pl = newFn;
+        this.plOutT = newFnOutT;
     }
 
     // for initialising with a starting value
     // TODO: move this to a utility function to avoid having a public Constructor not specified by the Interface
-    public FnPipeline(A in) {
-        this.input = in;
+    public FnPipeline(Type initialType) {
         this.pl = (Function<A, O>) Function.identity();
+        this.plOutT = initialType;
     }
 
-    /**
+    /** todo: update doc
      * Extend the current pipeline by using function compoisition provided by java.util.Function
      * @param f The function to attach to the end of this pipeline
      * @param <V> The out-type of the pipeline
@@ -44,23 +46,32 @@ public class FnPipeline<A,O> implements Pipeline<A, O> {
      */
     @Override
     public <V> FnPipeline<A,V> attach(
-            // f needs to be able to process geq than T (out-type of previous pipeline)
-            // f needs to to not return more than the new out-parameter specifiies
-            // f needs to not return less than the new out-param (no "? extends V")
-            Function<? super O, V> f
+            Field f
     ) {
-        return new FnPipeline<A,V>(
-                this.input, // input value remains unchanged
-                this.pl.andThen(f) // returns a composed function
-        );
+
+        Type fOutT = ((ParameterizedType) f.getGenericType()).getActualTypeArguments()[1]; // todo
+        try {
+            // f.get gets the value of the field in the specified object
+            // since we assume f to be a static field, we can "omit" this argument
+            // since we assume f to be properly declared, we cast it to the Function type
+            Function fn = (Function) f.get(null);
+            return new FnPipeline<A,V>(
+                    // input value remains unchanged
+                    this.pl.andThen(fn), // returns a composed function
+                    fOutT
+            );
+        } catch (IllegalAccessException e) {
+            e.printStackTrace(); // todo
+            return null;
+        }
     }
 
     /**
      * See interface for documentation
      */
     @Override
-    public O eval() {
-        return this.pl.apply(input);
+    public O eval(A in) {
+        return this.pl.apply(in);
     }
 
     /**
@@ -70,16 +81,11 @@ public class FnPipeline<A,O> implements Pipeline<A, O> {
      * This is facilitated by the type variables on <code>attach</code>.
      */
     @Override
-    public boolean checkAttachable(Function f) {
-        try {
-            Pipeline<A, Object> res = this.attach(f);
-            // note we have to do `eval` here because Function compositions are evaluated lazily at runtime, thus
-            // a potential cast exception occurs only then.
-            // todo: avoid laziness by `apply`ing always after attach?
-            res.eval();
-        } catch (ClassCastException e) {
-            return false;
-        }
-        return true;
+    // note: when calling this with e.g. a Function<String,String> we are actually performing an up-cast
+    public boolean checkAttachable(Field f) {
+        Type fInT = ((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0]; // todo
+        return fInT == plOutT;
+        // todo: we only check for exact matches, not subtyping relationships
+        //  this is probably possible by obtaining the Class<?> object from the Type and using isInstance
     }
 }

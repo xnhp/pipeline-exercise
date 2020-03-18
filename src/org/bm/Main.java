@@ -3,9 +3,7 @@ package org.bm;
 import com.sun.javaws.exceptions.InvalidArgumentException;
 import org.bm.cli.CLIOptions;
 import org.bm.io.IOUtils;
-import org.bm.operations.AdditionalOperations;
-import org.bm.operations.OperationsManager;
-import org.bm.operations.StandardOperations;
+import org.bm.operations.*;
 import picocli.CommandLine;
 
 import java.io.IOException;
@@ -32,14 +30,8 @@ public class Main {
 		// parse arguments and store values in CLIOptions.instance
 		setupCommandLine(CLIOptions.instance).parseArgs(args);
 
-        try {
-            OperationsManager.registerOperations(StandardOperations.class);
-            OperationsManager.registerOperations(AdditionalOperations.class);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            return;
-        }
-
+		OperationsManager.registerOperations(StandardOperations.class);
+		OperationsManager.registerOperations(AdditionalOperations.class);
 
 		try {
 
@@ -77,6 +69,14 @@ public class Main {
 	 *                        probably also constrain the type of the value passed to the Consumer
 	 */
 	public static void processChunks(Stream<List<String>> chunkedInput, Consumer<List<Object>> chunkCallback) throws InvalidArgumentException {
+
+		// assemble a Pipeline object representing the sequence of operations to be applied to each line
+		// This instantiation is intentionally left unparameterised as the actual in- and out- value types of
+		// a pipeline are dynamic
+		// Type safety (i.e. compatibility to initial argument and between operations)
+		// is checked during construction of the pipeline
+		Pipeline pip = OperationsManager.assemblePipeline(CLIOptions.instance);
+
 		// java.util.concurrent.Executor is a nice framework to handle the management of a thread pool for us.
 		// the the key ingredient is es.submit(•) which submits a task to the thread pool and returns
 		// a "Future" object f that repreents the eventual outcome of the computation.
@@ -93,7 +93,10 @@ public class Main {
 			return es.submit(() -> {
 				return lines.stream()
 						.peek((String l) -> Statistics.getInstance().updateStatisticsWithLine(l))
-						.map(OperationsManager::evalLine) // map does not break order within chunk
+						// map does not break order within chunk
+						// call can be left unchecked assuming pipeline was assembled correctly
+						//   that is, with the correct, type-compatible operations
+						.map((Function<String, Object>) pip::eval)
 						.collect(Collectors.toList());
 			});
 		};

@@ -5,7 +5,6 @@ import org.bm.cli.CLIOptions;
 
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -17,7 +16,7 @@ public class OperationsManager {
      * Contains the mapping between commands (operations as specified by CLI arguments)
      * and corresponding functions (more than one if several functions fit the command).
      */
-    public static Map<String, List<Function>> opsMap = new HashMap<>();
+    public static Map<String, List<Field>> opsMap = new HashMap<>();
 
     /**
      * Make operations accessible for being selected by command-line arguments
@@ -26,20 +25,21 @@ public class OperationsManager {
      * Note that we assume these fields to be properly expressed: static, Function type, and with annotation
      * @param clazz A class containg fields of the type <code>Function</code> annotated by <code>@Operation</code>
      */
-    public static void registerOperations(Class clazz) throws IllegalAccessException {
+    public static void registerOperations(Class clazz) {
         // we use "Reflection" methods to obtain the fields and their annotations
-        for (Field f : clazz.getDeclaredFields()) {
-            Operation opAnnot = f.getDeclaredAnnotation(Operation.class);
+        for (Field field : clazz.getDeclaredFields()) {
+            Operation opAnnot = field.getDeclaredAnnotation(Operation.class);
             // only consider annotated fields
             if (opAnnot == null || opAnnot.keyword() == null) continue;
             String keyword = opAnnot.keyword();
+            // todo: filter if f.getDeclaredType is instance of ParameterizedTypeImpl
+            //   and has two type arguments
+            //   and maybe also check if is a Function type
+
             // upsert map with candidate function
             if (!opsMap.containsKey(keyword)) opsMap.put(keyword, new LinkedList<>());
             opsMap.get(keyword).add(
-                    // f.get gets the value of the field in the specified object
-                    // since we assume f to be a static field, we can "omit" this argument
-                    // since we assume f to be properly declared, we cast it to the Function type
-                    (Function) f.get(null)
+                    field
             );
         }
     }
@@ -50,22 +50,18 @@ public class OperationsManager {
      *
      * Candidate functions will be these matching the command keyword.
      *
-     * @param init Initial value that the constructed function composition will be applied to.
-     * @param cmds Commands that define the function composition
      * @return A <code>Pipeline</code> object representing the function composition on the initial argument. Note that
      * at this point, the actual computations are not necessarily carried out yet.
      */
-    public static Pipeline assemblePipeline(String init, List<String> cmds) throws InvalidArgumentException {
-        // todo: can express this with stream reduce instead of loop?
-        // todo: make use of CLIOptions.instance.inputType to cast input values
-
+    public static Pipeline assemblePipeline(CLIOptions opts) throws InvalidArgumentException {
+        // construct an initial pipeline with the correct out type
         Pipeline pip;
         try {
-            switch (CLIOptions.instance.inputType) {
-                case STRING: pip = new FnPipeline<String,String>(init); break;
-                case INT:    pip = new FnPipeline<Integer,Integer>(new Integer(init)); break;
-                case DOUBLE: pip = new FnPipeline<Double,Double>(new Double(init)); break;
-                default:     pip = new FnPipeline(init); break;
+            switch (opts.inputType) {
+                case INT:    pip = new FnPipeline<Integer,Integer>(Integer.class); break;
+                case DOUBLE: pip = new FnPipeline<Double,Double>(Double.class); break;
+                // STRING and default
+                default:     pip = new FnPipeline(String.class); break;
             }
         } catch (NumberFormatException e) {
             // NumberFormatException is a subclass of InvalidArgumentException
@@ -74,9 +70,9 @@ public class OperationsManager {
             throw new InvalidArgumentException(new String[]{"Could not parse number from input"});
         }
 
-
-        for (String cmd : cmds) {
-            List<Function> candidates = opsMap.get(cmd);
+        // identify and attach given operations
+        for (String cmd : opts.operations) {
+            List<Field> candidates = opsMap.get(cmd);
             if (candidates == null) {
                 throw new InvalidArgumentException(new String[]{"unrecognised command"});
             }
@@ -93,29 +89,18 @@ public class OperationsManager {
      * @return A new Pipeline object, representing the extended pipeline
      * @throws InvalidArgumentException If no candidates or no "attachable" candidates are present.
      */
-    private static Pipeline attachByCandidates(Pipeline initPip, List<Function> candidates) throws InvalidArgumentException {
-        List<Function> matches = candidates.stream()
+    private static Pipeline attachByCandidates(Pipeline initPip, List<Field> candidates) throws InvalidArgumentException {
+        List<Field> matches = candidates.stream()
                 .filter(initPip::checkAttachable)
                 .collect(Collectors.toList());
-        Function f = matches.get(matches.size()-1);
+
+        if (matches.size() == 0) {
+            throw new InvalidArgumentException(new String[]{"No matching operation"});
+        }
+
+        Field f = matches.get(matches.size()-1);
 
         // we leave this call unchecked w.r.t type parameters because `checkAttachable` ensures this for us.
         return initPip.attach(f);
     }
-
-    /**
-     * The procedure to be applied to each line.
-     * @throws InvalidArgumentException In case no operations can be found for a given command
-     * @return
-     */
-    public static Object evalLine (String line) {
-        try {
-            return OperationsManager
-                    .assemblePipeline(line, CLIOptions.instance.operations)
-                    .eval();
-        } catch (InvalidArgumentException e) {
-            e.printStackTrace();
-            return null;
-        }
-    };
 }

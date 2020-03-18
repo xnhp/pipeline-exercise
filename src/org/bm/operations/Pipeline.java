@@ -1,5 +1,7 @@
 package org.bm.operations;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.function.Function;
 
 /**
@@ -19,25 +21,25 @@ public interface Pipeline<A, O> {
      * @param f The function to attach to the end of this pipeline
      * @param <V> The output type of <code>f</code> and the output type of the new pipeline.
      * @return a new pipeline parameterised by V, i.e. with out-type V
+     * todo update this
      */
     <V> Pipeline<A,V> attach(
-            // f needs to be able to process geq than T (out-type of previous pipeline)
-            // f needs to to not return more than the new out-parameter specifiies
-            // f needs to not return less than the new out-param (no "? extends V")
-            Function<? super O, V> f
+            // todo: comment on Function<? super O, V> f,
+            Field f
     );
 
     /**
+     * todo update doc
      * Actually compute and return the result value of this pipeline.
      * This is particularly needed in case of lazy implementations.
      * @return The result value of this pipeline based on ints initial argument.
      */
-    O eval();
+    O eval(A in);
 
     /**
      * For a given unparameterised function value, check whether it can be attached to the pipeline.
      * @param f The function to be checked
      * @return true iff the function could be attached to the pipeline.
      */
-    boolean checkAttachable(Function f);
+    boolean checkAttachable(Field f);
 }

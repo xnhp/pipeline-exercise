@@ -22,13 +22,8 @@ class OperationsManagerTest {
 
     @BeforeAll
     static void setUp() {
-        try {
-            OperationsManager.registerOperations(OriginalOperations.class);
-            OperationsManager.registerOperations(AdditionalOperations.class);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            fail();
-        }
+        OperationsManager.registerOperations(OriginalOperations.class);
+        OperationsManager.registerOperations(AdditionalOperations.class);
     }
 
     static class OriginalOperations {
@@ -69,11 +64,7 @@ class OperationsManagerTest {
     @Test
     void inputTypeString() {
 
-        try {
-            OperationsManager.registerOperations(StandardOperations.class);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        OperationsManager.registerOperations(StandardOperations.class);
 
         CommandLine cl = setupCommandLine(CLIOptions.instance);
         String[] args = new String[] {
@@ -86,18 +77,19 @@ class OperationsManagerTest {
         };
         cl.parseArgs(args);
 
-        OperationsManager.evalLine("42");
-
-
+        try {
+            OperationsManager
+                    .assemblePipeline(CLIOptions.instance)
+                    .eval("42");
+        } catch (InvalidArgumentException e) {
+            e.printStackTrace();
+            fail();
+        }
     }
 
     @Test
     void inputTypeFail() {
-        try {
-            OperationsManager.registerOperations(StandardOperations.class);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        OperationsManager.registerOperations(StandardOperations.class);
 
         CommandLine cl = setupCommandLine(CLIOptions.instance);
         String[] args = new String[] {
@@ -106,14 +98,14 @@ class OperationsManagerTest {
                 "--threads", "1",
                 "--chunksize", "1",
                 "--output", "bar.txt",
-                "--operations", "capitalize"
+                "--operations", "neg"
         };
         cl.parseArgs(args);
 
-        assertThrows(InvalidArgumentException.class, () -> {
+        assertThrows(ClassCastException.class, () -> {
             OperationsManager
-                    .assemblePipeline("notanumber", CLIOptions.instance.operations)
-                    .eval();
+                    .assemblePipeline(CLIOptions.instance)
+                    .eval("notanumber");
         });
 
     }
