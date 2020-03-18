@@ -40,5 +40,11 @@ class StandardOperationsTest {
         assertEquals(StandardOperations.negateDouble.apply(n).doubleValue(), new Double(-123).doubleValue());
     }
 
+    @Test
+    void reverseInteger() {
+        assertEquals(-321, StandardOperations.reverseInt.apply(new Integer(-123)));
+        assertEquals(24, StandardOperations.reverseInt.apply(new Integer(42)));
+    }
+
 
 }
