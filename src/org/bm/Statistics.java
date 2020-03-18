@@ -52,4 +52,14 @@ public class Statistics {
 		if (instance == null) instance = new Statistics();
 		return instance;
 	}
+
+	/**
+	 * Reset the singleton instance to a fresh one.
+	 * This is needed for writing tests since running several tests in succession will share the same singleton
+	 * @return the fresh instance
+	 */
+	public static Statistics resetInstance() {
+		instance = new Statistics();
+		return instance;
+	}
 }

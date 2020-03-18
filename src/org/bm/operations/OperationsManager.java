@@ -98,7 +98,6 @@ public class OperationsManager {
      * @return
      */
     public static String evalLine (String line) {
-        Statistics.getInstance().updateStatisticsWithLine(line);
         try {
             return OperationsManager
                     .assemblePipeline(line, CLIOptions.instance.operations)

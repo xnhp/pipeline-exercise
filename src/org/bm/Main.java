@@ -86,6 +86,7 @@ public class Main {
 			// which returns a Future object containing eventual results
 			return es.submit(() -> {
 				return lines.stream()
+						.peek((String l) -> Statistics.getInstance().updateStatisticsWithLine(l))
 						.map(OperationsManager::evalLine) // map does not break order within chunk
 						.collect(Collectors.toList());
 			});

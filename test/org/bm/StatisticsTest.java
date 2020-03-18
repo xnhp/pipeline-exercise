@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Benjamin Moser.
  */
 class StatisticsTest {
+
     @Test
     void test() {
 
@@ -40,6 +41,7 @@ class StatisticsTest {
         };
         cl.parseArgs(args);
 
+        Statistics.resetInstance();
         Statistics s = Statistics.getInstance();
         // we assume File.lines to be correct
         Stream<List<String>> stream = IOUtils.getChunkedStream(Stream.of("foo", "bar", "baz", "foo"));
