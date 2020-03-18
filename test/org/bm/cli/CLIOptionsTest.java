@@ -15,8 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class CLIOptionsTest {
 
-    // todo: test input file
-
     @Test
     void testInputTypeParseCorrect() {
         CommandLine cl = setupCommandLine(CLIOptions.instance);
