@@ -22,8 +22,13 @@ class StatisticsTest {
     @Test
     void test() {
 
-        OperationsManager.registerOperations(StandardOperations.class);
-        OperationsManager.registerOperations(AdditionalOperations.class);
+        try {
+            OperationsManager.registerOperations(StandardOperations.class);
+            OperationsManager.registerOperations(AdditionalOperations.class);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            fail();
+        }
 
         CommandLine cl = setupCommandLine(CLIOptions.instance);
         String[] args = new String[] {

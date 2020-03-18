@@ -28,25 +28,21 @@ public class OperationsManager {
      *  to allow "overwriting"
      * @param clazz A class containg fields of the type <code>Function</code> annotated by <code>@Operation</code>
      */
-    public static void registerOperations(Class clazz) {
+    public static void registerOperations(Class clazz) throws IllegalAccessException {
         // we use "Reflection" methods to obtain the fields and their annotations
         for (Field f : clazz.getDeclaredFields()) {
             Operation opAnnot = f.getDeclaredAnnotation(Operation.class);
             // only consider annotated fields
             if (opAnnot == null || opAnnot.keyword() == null) continue;
             String keyword = opAnnot.keyword();
-            try {
-                // upsert map with candidate function
-                if (!opsMap.containsKey(keyword)) opsMap.put(keyword, new LinkedList<>());
-                opsMap.get(keyword).add(
-                        // f.get gets the value of the field in the specified object
-                        // since we assume f to be a static field, we can "omit" this argument
-                        // since we assume f to be properly declared, we cast it to the Function type
-                        (Function) f.get(null)
-                );
-            } catch (ClassCastException | IllegalAccessException e) {
-                e.printStackTrace(); // todo
-            }
+            // upsert map with candidate function
+            if (!opsMap.containsKey(keyword)) opsMap.put(keyword, new LinkedList<>());
+            opsMap.get(keyword).add(
+                    // f.get gets the value of the field in the specified object
+                    // since we assume f to be a static field, we can "omit" this argument
+                    // since we assume f to be properly declared, we cast it to the Function type
+                    (Function) f.get(null)
+            );
         }
     }
 

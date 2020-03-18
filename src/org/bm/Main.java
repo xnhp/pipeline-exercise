@@ -32,8 +32,14 @@ public class Main {
 		// parse arguments and store values in CLIOptions.instance
 		setupCommandLine(CLIOptions.instance).parseArgs(args);
 
-		OperationsManager.registerOperations(StandardOperations.class);
-		OperationsManager.registerOperations(AdditionalOperations.class);
+        try {
+            OperationsManager.registerOperations(StandardOperations.class);
+            OperationsManager.registerOperations(AdditionalOperations.class);
+        } catch (IllegalAccessException e) {
+            System.out.println("Invalid operations");
+            e.printStackTrace();
+        }
+
 
 		try {
 
