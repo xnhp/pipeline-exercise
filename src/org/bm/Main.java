@@ -85,7 +85,7 @@ public class Main {
 		// a pipeline are dynamic
 		// Type safety (i.e. compatibility to initial argument and between operations)
 		// is checked during construction of the pipeline
-		Pipeline pip = OperationsManager.assemblePipeline(CLIOptions.instance);
+		final Pipeline[] pip = {OperationsManager.assemblePipeline(CLIOptions.instance)};
 
 		// java.util.concurrent.Executor is a nice framework to handle the management of a thread pool for us.
 		// the the key ingredient is es.submit(•) which submits a task to the thread pool and returns
@@ -106,7 +106,15 @@ public class Main {
 						// map does not break order within chunk
 						// call can be left unchecked assuming pipeline was assembled correctly
 						//   that is, with the correct, type-compatible operations
-						.map((Function<String, Object>) pip::eval)
+						// .map((Function<Object, Object>) pip::eval)
+						.map((String l) -> {
+							switch (CLIOptions.instance.inputType) {
+								case INT:    return pip[0].eval(Integer.parseInt(l));
+								case DOUBLE: return pip[0].eval(Double.parseDouble(l));
+								// STRING and default
+								default:     return pip[0].eval(l);
+							}
+						})
 						.collect(Collectors.toList());
 			});
 		};
