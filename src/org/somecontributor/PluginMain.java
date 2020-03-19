@@ -16,7 +16,7 @@ public class PluginMain {
         // start the main app
         Main.start(args);
 
-        // TODO: ability to easy add new recognised input types
+        // TODO: ability to easily add new recognised input types
 
     }
 
