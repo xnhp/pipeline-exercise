@@ -48,6 +48,19 @@ public class IOUtils {
                 .map(Map.Entry::getValue);
     }
 
+
+    private static List<String> chunkToString(List<Object> chunk) {
+        return chunk.stream()
+                .map(Object::toString)
+                .collect(Collectors.toList());
+    }
+
+
+    public static void writeToStdOut(List<Object> resultChunk) {
+        List<String> strings = chunkToString(resultChunk);
+        strings.stream().forEachOrdered((String s) -> {System.out.println(s);});
+    }
+
     /**
      * Write a processed chunk to the output file
      * @param resultChunk
@@ -55,9 +68,7 @@ public class IOUtils {
     public static void writeToOutFile(List<Object> resultChunk) {
 
         // convert results to strings
-        List<String> strings = resultChunk.stream()
-                .map(Object::toString)
-                .collect(Collectors.toList());
+        List<String> strings = chunkToString(resultChunk);
 
         try {
             // use NIO Files over FileWriter because it handles writing seperate lines with

@@ -40,7 +40,7 @@ public class Main {
 
 		// determine how to handle output
 		Consumer<List<Object>> outputConsumer = (CLIOptions.instance.outputFile == null) ?
-				System.out::println //note that this will carry out an implicit .toString conversion
+				IOUtils::writeToStdOut //note that this will carry out an implicit .toString conversion
 				: IOUtils::writeToOutFile;
 
 		try {
