@@ -134,6 +134,8 @@ public class Main {
                     System.exit(-1);
 				}
 			});
+
+		es.shutdown();
 	}
 
 
