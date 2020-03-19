@@ -127,7 +127,11 @@ public class Main {
 						f.get()
 					);
 				} catch (InterruptedException | ExecutionException e) {
-					e.printStackTrace();
+				    // note that this happens upon trying to collect the result,
+                    // not immediately on interrupt/exception
+					System.out.println("Error executing thread or interrupted");
+                    e.printStackTrace();
+                    System.exit(-1);
 				}
 			});
 	}
