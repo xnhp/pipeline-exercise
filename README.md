@@ -65,5 +65,6 @@ The basic flow is as follows:
 
 ## Terminology
 * **Pipeline** -- In the abstract sense, a composite function representing a sequence of operations.
+  * **Initial argument** -- In the `FnPipeline` implementation of the `Pipeline` interface, the pipeline is dependent on the value it will be applied to, i.e. for each input value we have a seperate pipeline object. This is because  • it follows lazy evaluation  • we use a runtime subtyping check to determine whether a candidate function can be attached to the pipeline.
 * **Operation** -- A simple procedure that takes one input argument and returns a return value. These are mostly pure transformations.
   * **keyword** -- A string that identifies the operation with the corresponding command-line argument.
